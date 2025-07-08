@@ -21,8 +21,6 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();
 });
 
-Route::get('/employee', [EmployeeController::class, 'show']);
-
-Route::get('/profile/basic', [EmployeeController::class, 'getBasicProfile']);
-
-Route::post('/test', [PostController::class, 'test']);
+Route::get('/employee', function () {
+    return response()->json(['message' => 'Welcome to the employee API!']);
+});
