@@ -1,0 +1,29 @@
+ .animate-spin {
+     animation: spin 1s linear infinite;
+ }
+
+ @keyframes spin {
+     0% {
+         transform: rotate(0deg);
+     }
+
+     100% {
+         transform: rotate(360deg);
+     }
+ }
+.active-tab {
+    border-bottom: 2px solid #6366f1;
+    font-weight: 600;
+    color: #6366f1;
+}
+.resp-tab-btn.active-tab {
+    border-bottom: 2px solid #6366f1;
+    font-weight: 600;
+    color: #6366f1;
+}
+.resp-tab-btn.active-tab,
+.main-tab-btn.active-tab {
+    border-bottom: 2px solid #6366f1;
+    font-weight: 600;
+    color: #6366f1;
+}

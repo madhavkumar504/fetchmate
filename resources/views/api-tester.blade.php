@@ -23,10 +23,10 @@
 
 <!-- Tabs -->
 <ul class="flex space-x-4 border-b border-gray-700 mb-4" id="tabs">
-    <li><button class="tab-btn border-b-2 border-blue-500 pb-2" onclick="showTab('params')">Params</button></li>
-    <li><button class="tab-btn pb-2" onclick="showTab('auth')">Authorization</button></li>
-    <li><button class="tab-btn pb-2" onclick="showTab('headers')">Headers</button></li>
-    <li><button class="tab-btn pb-2" onclick="showTab('body')">Body</button></li>
+    <li><button class="tab-btn active-tab border-b-2 pb-2" data-tab="params" onclick="showTab('params')">Params</button></li>
+    <li><button class="tab-btn pb-2" data-tab="auth" onclick="showTab('auth')">Authorization</button></li>
+    <li><button class="tab-btn pb-2" data-tab="headers" onclick="showTab('headers')">Headers</button></li>
+    <li><button class="tab-btn pb-2" data-tab="body" onclick="showTab('body')">Body</button></li>
 </ul>
 
 <!-- Tab Contents -->
@@ -40,15 +40,45 @@
         </thead>
         <tbody id="params-table">
             <tr>
-                <td class="p-2"><input type="text" class="param-key w-full bg-gray-700 p-1 rounded" /></td>
-                <td class="p-2"><input type="text" class="param-value w-full bg-gray-700 p-1 rounded" /></td>
+                <td class="p-2 flex items-center gap-2">
+                    <input type="checkbox" class="param-active" checked />
+                    <input type="text" class="param-key w-full bg-gray-700 p-1 rounded" placeholder="Key" />
+                </td>
+                <td class="p-2"><input type="text" class="param-value w-full bg-gray-700 p-1 rounded" placeholder="Value" /></td>
             </tr>
         </tbody>
     </table>
 </div>
+<!-- //Authorization section  -->
 <div id="auth" class="tab-content hidden">
-    <p class="text-gray-400">Authorization settings will appear here.</p>
+    <div class="flex flex-col md:flex-row gap-6 items-start">
+        <!-- Left Column: Dropdown -->
+        <div class="w-full md:w-1/3">
+            <label for="auth-type" class="text-white block mb-2 font-medium">Auth Type</label>
+            <select id="auth-type" class="bg-gray-800 text-white border border-gray-600 px-3 py-2 rounded w-full">
+                <option value="none">No Auth</option>
+                <option value="api-key">API Key</option>
+                <option value="bearer">Bearer Token</option>
+                <option value="basic">Basic Auth</option>
+                <option value="digest">Digest Auth</option>
+                <option value="oauth1">OAuth 1.0</option>
+                <option value="oauth2">OAuth 2.0</option>
+                <option value="hawk">Hawk Authentication</option>
+                <option value="aws">AWS Signature</option>
+                <option value="ntlm">NTLM Authentication</option>
+                <option value="akamai">Akamai EdgeGrid</option>
+                <option value="manual">Self-handled Authorization</option>
+            </select>
+        </div>
+
+        <!-- Right Column: Fields -->
+        <div id="auth-fields" class="w-full md:w-2/3 bg-gray-800 border border-gray-700 rounded p-4 space-y-4 shadow-inner">
+            <!-- Fields will be injected here -->
+        </div>
+    </div>
 </div>
+
+
 <div id="headers" class="tab-content hidden">
     <table class="w-full text-sm text-white border border-gray-700">
         <thead>
@@ -59,15 +89,89 @@
         </thead>
         <tbody id="headers-table">
             <tr>
-                <td class="p-2"><input type="text" class="w-full bg-gray-700 p-1 rounded" /></td>
-                <td class="p-2"><input type="text" class="w-full bg-gray-700 p-1 rounded" /></td>
+                <td class="p-2 flex items-center gap-2">
+                    <input type="checkbox" class="header-active" checked />
+                    <input type="text" class="w-full bg-gray-700 p-1 rounded" placeholder="Key" />
+                </td>
+                <td class="p-2"><input type="text" class="w-full bg-gray-700 p-1 rounded" placeholder="Value" /></td>
             </tr>
         </tbody>
     </table>
 </div>
 <div id="body" class="tab-content hidden">
-    <textarea id="raw-body" class="w-full h-40 p-3 bg-gray-800 border border-gray-700 rounded text-white"></textarea>
+    <!-- Body Type Radio Buttons -->
+    <div class="mb-4">
+        <label class="font-semibold block mb-2">Body Type</label>
+        <div class="flex gap-6 text-sm">
+            <label><input type="radio" name="bodyType" value="none" checked class="mr-1">None</label>
+            <label><input type="radio" name="bodyType" value="form-data" class="mr-1">form-data</label>
+            <label><input type="radio" name="bodyType" value="x-www-form-urlencoded" class="mr-1">x-www-form-urlencoded</label>
+            <label><input type="radio" name="bodyType" value="raw" class="mr-1">raw</label>
+            <label><input type="radio" name="bodyType" value="binary" class="mr-1">binary</label>
+            <label><input type="radio" name="bodyType" value="graphql" class="mr-1">GraphQL</label>
+        </div>
+    </div>
+
+    <!-- Dynamic Sections -->
+    <div id="body-none" class="body-type-section hidden"></div>
+
+    <div id="body-form-data" class="body-type-section hidden">
+        <table class="w-full text-sm text-white border border-gray-700">
+            <thead>
+                <tr class="bg-gray-800 border-b border-gray-700">
+                    <th class="p-2">Send</th>
+                    <th class="p-2">Key</th>
+                    <th class="p-2">Value</th>
+                </tr>
+            </thead>
+            <tbody id="form-data-table">
+                <tr>
+                    <td class="p-2 text-center">
+                        <input type="checkbox" class="form-active" checked />
+                    </td>
+                    <td class="p-2">
+                        <input type="text" name="formKey[]" class="form-key-input w-full bg-gray-700 p-1 rounded" placeholder="Key">
+                    </td>
+                    <td class="p-2">
+                        <input type="text" name="formValue[]" class="w-full bg-gray-700 p-1 rounded" placeholder="Value">
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+
+
+    <div id="body-x-www-form-urlencoded" class="body-type-section hidden">
+        <table class="w-full text-sm text-white border border-gray-700">
+            <thead>
+                <tr class="bg-gray-800 border-b border-gray-700">
+                    <th class="p-2">Key</th>
+                    <th class="p-2">Value</th>
+                </tr>
+            </thead>
+            <tbody id="urlencoded-table">
+                <tr>
+                    <td class="p-2"><input type="text" class="w-full bg-gray-700 p-1 rounded" placeholder="Key" /></td>
+                    <td class="p-2"><input type="text" class="w-full bg-gray-700 p-1 rounded" placeholder="Value" /></td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <div id="body-raw" class="body-type-section hidden">
+        <textarea id="raw-body" class="w-full h-40 p-3 bg-gray-800 border border-gray-700 rounded text-white" placeholder="Enter raw JSON, XML, or text..."></textarea>
+    </div>
+
+    <div id="body-binary" class="body-type-section hidden">
+        <input type="file" class="block w-full text-sm text-white file:bg-gray-700 file:border-0 file:py-2 file:px-4 file:rounded file:text-white">
+    </div>
+
+    <div id="body-graphql" class="body-type-section hidden">
+        <textarea id="graphql-body" class="w-full h-40 p-3 bg-gray-800 border border-gray-700 rounded text-white" placeholder="Enter GraphQL query..."></textarea>
+    </div>
 </div>
+
 
 <!-- Response Section -->
 <div class="mt-8">
@@ -86,9 +190,15 @@
     <div id="structured" class="main-tab-content block mt-4">
         <!-- Nested Tabs -->
         <ul class="flex space-x-4 border-b border-gray-700">
-            <li><button class="resp-tab-btn border-b-2 border-blue-500 pb-2" onclick="showResponseTab('resp-body')">Body</button></li>
-            <li><button class="resp-tab-btn pb-2" onclick="showResponseTab('resp-headers')">Headers</button></li>
-            <li><button class="resp-tab-btn pb-2" onclick="showResponseTab('resp-cookies')">Cookies</button></li>
+            <li>
+                <button class="resp-tab-btn pb-2 text-white" onclick="showResponseTab('resp-body')">Body</button>
+            </li>
+            <li>
+                <button class="resp-tab-btn pb-2 text-white" onclick="showResponseTab('resp-headers')">Headers</button>
+            </li>
+            <li>
+                <button class="resp-tab-btn pb-2 text-white" onclick="showResponseTab('resp-cookies')">Cookies</button>
+            </li>
         </ul>
         <div class="mt-4">
             <div id="resp-body" class="resp-tab-content block">
@@ -123,6 +233,14 @@
         <iframe id="html-preview" class="w-full h-64 bg-white text-black rounded p-3"></iframe>
     </div>
 </div>
+<!-- Loader -->
+<div id="loader" class="hidden fixed top-0 left-0 w-full h-full bg-black bg-opacity-50 flex items-center justify-center z-50">
+    <div class="loader-box flex flex-col items-center gap-4">
+        <div class="loader-spin border-4 border-blue-600 border-t-transparent rounded-full w-16 h-16 animate-spin"></div>
+        <p class="text-white font-semibold">Sending request...</p>
+    </div>
+</div>
+
 
 <script>
     function handleCurlPaste(event) {
@@ -174,25 +292,65 @@
     }
 
     function showTab(tabId) {
+        // Hide all tab contents
         document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
+
+        // Show selected tab content
         document.getElementById(tabId).classList.remove('hidden');
+
+        // Remove 'active-tab' from all tab buttons
+        document.querySelectorAll('#tabs .tab-btn').forEach(btn => btn.classList.remove('active-tab'));
+
+        // Add 'active-tab' to the clicked one
+        const activeBtn = document.querySelector(`#tabs .tab-btn[data-tab="${tabId}"]`);
+        if (activeBtn) {
+            activeBtn.classList.add('active-tab');
+        }
     }
 
     function showMainResponseTab(tabId) {
+        // Hide all main-tab content
         document.querySelectorAll('.main-tab-content').forEach(el => el.classList.add('hidden'));
+
+        // Show the selected tab content
         document.getElementById(tabId).classList.remove('hidden');
+
+        // Remove active-tab from all main tab buttons
+        document.querySelectorAll('.main-tab-btn').forEach(btn => btn.classList.remove('active-tab'));
+
+        // Add active-tab to clicked button
+        const activeBtn = document.querySelector(`.main-tab-btn[onclick="showMainResponseTab('${tabId}')"]`);
+        if (activeBtn) {
+            activeBtn.classList.add('active-tab');
+        }
     }
 
     function showResponseTab(tabId) {
+        // Hide all response tab contents
         document.querySelectorAll('.resp-tab-content').forEach(el => el.classList.add('hidden'));
+
+        // Show selected content
         document.getElementById(tabId).classList.remove('hidden');
+
+        // Remove active-tab from all buttons
+        document.querySelectorAll('.resp-tab-btn').forEach(btn => btn.classList.remove('active-tab'));
+
+        // Add active-tab to the clicked button
+        const activeBtn = document.querySelector(`.resp-tab-btn[onclick="showResponseTab('${tabId}')"]`);
+        if (activeBtn) {
+            activeBtn.classList.add('active-tab');
+        }
     }
+
 
     function escapeHtml(unsafe) {
         return unsafe.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/\"/g, "&quot;").replace(/'/g, "&#039;");
     }
 
     document.getElementById('send').addEventListener('click', async () => {
+        // Show loader
+        document.getElementById('loader').classList.remove('hidden');
+
         const method = document.getElementById('method').value;
         const url = document.getElementById('url').value;
         const bodyText = document.getElementById('raw-body').value;
@@ -200,9 +358,10 @@
         const headersTable = document.querySelectorAll('#headers-table tr');
         const headers = {};
         headersTable.forEach(row => {
-            const cells = row.querySelectorAll('input');
-            if (cells.length === 2 && cells[0].value) {
-                headers[cells[0].value] = cells[1].value;
+            const checkbox = row.querySelector('.header-active');
+            const inputs = row.querySelectorAll('input');
+            if (inputs.length === 3 && checkbox.checked && inputs[1].value) {
+                headers[inputs[1].value] = inputs[2].value;
             }
         });
 
@@ -211,6 +370,7 @@
             body = bodyText ? JSON.parse(bodyText) : undefined;
         } catch (err) {
             alert('Invalid JSON body');
+            document.getElementById('loader').classList.add('hidden');
             return;
         }
 
@@ -222,13 +382,12 @@
                     'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
                 },
                 body: JSON.stringify({
-                    url: finalUrl,
+                    url: url,
                     method,
-                    headers: {}, // fill if needed
+                    headers: {}, // Optional: include headers
                     body
                 }),
             });
-
 
             const text = await response.text();
             let parsed;
@@ -244,6 +403,7 @@
             } else {
                 document.getElementById('response-body').innerText = JSON.stringify(parsed, null, 2);
             }
+
             renderResponseHeaders(response.headers);
             renderCookies(response.headers);
 
@@ -255,11 +415,16 @@
             } else {
                 document.getElementById('html-preview').srcdoc = `<html><body><pre>${escapeHtml(previewContent)}</pre></body></html>`;
             }
+
         } catch (err) {
             document.getElementById('response-body').innerText = 'Error: ' + err.message;
             document.getElementById('html-preview').srcdoc = `<pre>${err.message}</pre>`;
+        } finally {
+            // Hide loader in all cases (success/failure)
+            document.getElementById('loader').classList.add('hidden');
         }
     });
+
 
     function renderResponseHeaders(headers) {
         const table = document.getElementById('response-headers-table');
@@ -282,38 +447,356 @@
         table.addEventListener('input', () => {
             const rows = [...table.querySelectorAll('tr')];
             const lastRow = rows[rows.length - 1];
-            const key = lastRow.querySelector('.param-key').value;
-            const value = lastRow.querySelector('.param-value').value;
+            const keyInput = lastRow.querySelector('.param-key');
 
-            // If last row is filled, add a new empty row
-            if (key && value) {
+            if (keyInput && keyInput.value.trim() !== "") {
                 const newRow = document.createElement('tr');
                 newRow.innerHTML = `
-                <td class="p-2"><input type="text" class="param-key w-full bg-gray-700 p-1 rounded" /></td>
-                <td class="p-2"><input type="text" class="param-value w-full bg-gray-700 p-1 rounded" /></td>`;
+                    <td class="p-2 flex items-center gap-2">
+                        <input type="checkbox" class="param-active" checked />
+                        <input type="text" class="param-key w-full bg-gray-700 p-1 rounded" placeholder="Key" />
+                    </td>
+                    <td class="p-2"><input type="text" class="param-value w-full bg-gray-700 p-1 rounded" placeholder="Value" /></td>`;
                 table.appendChild(newRow);
             }
         });
     }
 
+
     watchParamsInput();
+
+    function watchHeadersInput() {
+        const table = document.getElementById('headers-table');
+
+        table.addEventListener('input', () => {
+            const rows = [...table.querySelectorAll('tr')];
+            const lastRow = rows[rows.length - 1];
+            const keyInput = lastRow.querySelector('input[type="text"]');
+
+            // Only add new row if key is filled and no empty rows exist
+            const allKeys = rows.map(r => r.querySelector('input[type="text"]')?.value.trim());
+            const hasBlankKey = allKeys.slice(0, -1).some(val => val === "");
+
+            if (!hasBlankKey && keyInput && keyInput.value.trim() !== "") {
+                const newRow = document.createElement('tr');
+                newRow.innerHTML = `
+                <td class="p-2 flex items-center gap-2">
+                    <input type="checkbox" class="header-active" checked />
+                    <input type="text" class="w-full bg-gray-700 p-1 rounded" placeholder="Key" />
+                </td>
+                <td class="p-2"><input type="text" class="w-full bg-gray-700 p-1 rounded" placeholder="Value" /></td>
+            `;
+                table.appendChild(newRow);
+            }
+        });
+    }
+    watchHeadersInput();
+
 
     function collectParams() {
         const rows = document.querySelectorAll('#params-table tr');
         const params = [];
 
         rows.forEach(row => {
-            const key = row.querySelector('.param-key')?.value.trim();
-            const value = row.querySelector('.param-value')?.value.trim();
-            if (key) {
+            const checkbox = row.querySelector('.param-active');
+            const keyInput = row.querySelector('.param-key');
+            const valueInput = row.querySelector('.param-value');
+            if (checkbox && checkbox.checked && keyInput?.value.trim()) {
                 params.push({
-                    key,
-                    value
+                    key: keyInput.value.trim(),
+                    value: valueInput?.value.trim()
                 });
             }
         });
-
         return params;
     }
+
+    document.querySelectorAll('input[name="bodyType"]').forEach(radio => {
+        radio.addEventListener('change', function() {
+            const selected = this.value;
+
+            // Hide all body type sections
+            document.querySelectorAll('.body-type-section').forEach(section => {
+                section.classList.add('hidden');
+            });
+
+            // Show selected
+            const selectedSection = document.getElementById(`body-${selected}`);
+            if (selectedSection) {
+                selectedSection.classList.remove('hidden');
+            }
+        });
+    });
+
+    document.addEventListener('DOMContentLoaded', () => {
+        const table = document.getElementById('form-data-table');
+
+        function createFormRow() {
+            const row = document.createElement('tr');
+            row.innerHTML = `
+            <td class="p-2 text-center">
+                <input type="checkbox" class="form-active" checked />
+            </td>
+            <td class="p-2">
+                <input type="text" name="formKey[]" class="form-key-input w-full bg-gray-700 p-1 rounded" placeholder="Key">
+            </td>
+            <td class="p-2">
+                <input type="text" name="formValue[]" class="w-full bg-gray-700 p-1 rounded" placeholder="Value">
+            </td>
+        `;
+            return row;
+        }
+
+        table.addEventListener('input', (e) => {
+            if (e.target && e.target.matches('.form-key-input')) {
+                const rows = table.querySelectorAll('tr');
+                const lastRow = rows[rows.length - 1];
+                const lastKeyInput = lastRow.querySelector('.form-key-input');
+
+                if (lastKeyInput === e.target && e.target.value.trim() !== '') {
+                    table.appendChild(createFormRow());
+                }
+            }
+        });
+    });
 </script>
-@endsection 
+
+<script>
+    const authFieldConfigs = {
+        "none": [],
+        "api-key": [{
+                label: "Key",
+                id: "api-key-name"
+            },
+            {
+                label: "Value",
+                id: "api-key-value"
+            },
+            {
+                label: "Add To",
+                id: "api-key-add-to",
+                type: "select",
+                options: ["Header", "Query Params"]
+            }
+        ],
+        "bearer": [{
+            label: "Token",
+            id: "bearer-token"
+        }],
+        "basic": [{
+                label: "Username",
+                id: "basic-username"
+            },
+            {
+                label: "Password",
+                id: "basic-password",
+                type: "password"
+            }
+        ],
+        "digest": [{
+                label: "Username",
+                id: "digest-username"
+            },
+            {
+                label: "Password",
+                id: "digest-password",
+                type: "password"
+            },
+            {
+                label: "Realm",
+                id: "digest-realm"
+            },
+            {
+                label: "Nonce",
+                id: "digest-nonce"
+            },
+            {
+                label: "Algorithm",
+                id: "digest-algo"
+            }
+        ],
+        "oauth1": [{
+                label: "Consumer Key",
+                id: "oauth1-consumer-key"
+            },
+            {
+                label: "Consumer Secret",
+                id: "oauth1-consumer-secret"
+            },
+            {
+                label: "Access Token",
+                id: "oauth1-token"
+            },
+            {
+                label: "Token Secret",
+                id: "oauth1-token-secret"
+            },
+            {
+                label: "Signature Method",
+                id: "oauth1-signature",
+                placeholder: "e.g. HMAC-SHA1"
+            },
+            {
+                label: "Timestamp",
+                id: "oauth1-timestamp"
+            },
+            {
+                label: "Nonce",
+                id: "oauth1-nonce"
+            },
+            {
+                label: "Version",
+                id: "oauth1-version"
+            }
+        ],
+        "oauth2": [{
+                label: "Grant Type",
+                id: "oauth2-grant",
+                placeholder: "Authorization Code / Client Credentials / Password"
+            },
+            {
+                label: "Access Token URL",
+                id: "oauth2-token-url"
+            },
+            {
+                label: "Client ID",
+                id: "oauth2-client-id"
+            },
+            {
+                label: "Client Secret",
+                id: "oauth2-client-secret"
+            },
+            {
+                label: "Scope",
+                id: "oauth2-scope"
+            },
+            {
+                label: "Username",
+                id: "oauth2-username"
+            },
+            {
+                label: "Password",
+                id: "oauth2-password",
+                type: "password"
+            },
+            {
+                label: "Auth URL",
+                id: "oauth2-auth-url"
+            },
+            {
+                label: "Redirect URI",
+                id: "oauth2-redirect-uri"
+            },
+            {
+                label: "Code Verifier",
+                id: "oauth2-code-verifier"
+            }
+        ],
+        "hawk": [{
+                label: "Hawk ID",
+                id: "hawk-id"
+            },
+            {
+                label: "Hawk Key",
+                id: "hawk-key"
+            },
+            {
+                label: "Algorithm",
+                id: "hawk-algo"
+            }
+        ],
+        "aws": [{
+                label: "Access Key",
+                id: "aws-access"
+            },
+            {
+                label: "Secret Key",
+                id: "aws-secret"
+            },
+            {
+                label: "AWS Region",
+                id: "aws-region"
+            },
+            {
+                label: "Service Name",
+                id: "aws-service"
+            },
+            {
+                label: "Session Token (optional)",
+                id: "aws-session"
+            }
+        ],
+        "ntlm": [{
+                label: "Username",
+                id: "ntlm-username"
+            },
+            {
+                label: "Password",
+                id: "ntlm-password",
+                type: "password"
+            },
+            {
+                label: "Domain",
+                id: "ntlm-domain"
+            },
+            {
+                label: "Workstation",
+                id: "ntlm-workstation"
+            }
+        ],
+        "akamai": [{
+                label: "Access Token",
+                id: "akamai-access"
+            },
+            {
+                label: "Client Token",
+                id: "akamai-client-token"
+            },
+            {
+                label: "Client Secret",
+                id: "akamai-client-secret"
+            },
+            {
+                label: "Host",
+                id: "akamai-host"
+            }
+        ],
+        "manual": []
+    };
+
+    function renderAuthFields(type) {
+        const container = document.getElementById('auth-fields');
+        container.innerHTML = "";
+
+        const fields = authFieldConfigs[type] || [];
+
+        fields.forEach(field => {
+            const inputType = field.type === "password" ? "password" : "text";
+
+            if (field.type === "select") {
+                const label = `<label for="${field.id}" class="text-white block mb-1">${field.label}</label>`;
+                const options = field.options.map(opt => `<option value="${opt.toLowerCase()}">${opt}</option>`).join('');
+                const select = `<select id="${field.id}" class="bg-gray-700 text-white w-full p-2 rounded">${options}</select>`;
+                container.innerHTML += `<div>${label}${select}</div>`;
+            } else {
+                const label = `<label for="${field.id}" class="text-white block mb-1">${field.label}</label>`;
+                const input = `<input id="${field.id}" type="${inputType}" class="bg-gray-700 text-white w-full p-2 rounded" placeholder="${field.placeholder || ''}" />`;
+                container.innerHTML += `<div>${label}${input}</div>`;
+            }
+        });
+
+        if (type === "none" || type === "manual") {
+            container.innerHTML = `<p class="text-gray-400 text-sm">No authentication fields required. You can add headers manually if needed.</p>`;
+        }
+    }
+
+    document.getElementById('auth-type').addEventListener('change', (e) => {
+        renderAuthFields(e.target.value);
+    });
+
+    // Render default (none) on page load
+    renderAuthFields('none');
+</script>
+
+
+@endsection
