@@ -8,7 +8,7 @@ use Illuminate\Support\Facades\Route;
 // });
 
 // View to show the tester frontend
-Route::view('/tester', 'api-tester');
+Route::view('/tester', 'api-tester'); //hii
 
 // Show frontend from controller (optional)
 Route::get('/', [ApiTesterController::class, 'index']);
